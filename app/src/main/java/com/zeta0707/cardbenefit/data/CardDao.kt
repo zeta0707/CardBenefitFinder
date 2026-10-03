@@ -17,6 +17,9 @@ interface CardDao {
     @Query("SELECT * FROM cards WHERE id = :cardId")
     suspend fun getCardById(cardId: Long): Card?
 
+    @Query("SELECT * FROM cards WHERE issuer = :issuer AND name = :name LIMIT 1")
+    suspend fun findCard(issuer: String, name: String): Card?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCard(card: Card): Long
 

@@ -40,18 +40,45 @@ object SeedData {
         memo = "생활밀착형 할인 카드. 전월실적 구간(30/50/100만원)에 따라 할인 한도가 커짐."
     )
 
-    fun cards(): List<Card> = listOf(idPlatinum, asianaGnMe, mrLife)
+    val travelZero = Card(
+        issuer = "코나아이(도깨비트래블)",
+        name = "도깨비 트래블제로카드",
+        annualFeeDomestic = 0,
+        annualFeeOverseas = 0,
+        homepageUrl = "https://event.konacard.co.kr/travelzero/card/intro.html",
+        memo = "일반 신용카드가 아니라 코나아이가 발급하는 선불 충전식 해외여행 전용카드(베트남 특화). " +
+            "전월실적 개념 자체가 없고, 평생 연회비 0원."
+    )
+
+    val hanaTravelog = Card(
+        issuer = "하나카드",
+        name = "트래블로그 체크카드(유니온페이)",
+        annualFeeDomestic = 0,
+        annualFeeOverseas = 0,
+        homepageUrl = "https://www.hanacard.co.kr/OPI41000000D.web?CD_PD_SEQ=15414",
+        memo = "신용카드가 아니라 하나머니 잔액으로 결제하는 체크카드(선불 성격). 국제브랜드는 " +
+            "마스터카드 또는 유니온페이 중 선택 가능하며 이 카드는 유니온페이 버전. " +
+            "전월실적 조건 없이 매월 동일하게 혜택 제공, 연회비 면제."
+    )
+
+    fun cards(): List<Card> = listOf(idPlatinum, asianaGnMe, mrLife, travelZero, hanaTravelog)
 
     /**
-     * cardIds: 위 3개 Card를 DB에 insert하고 돌려받은 (원본 Card -> 생성된 id) 매핑.
+     * cardIds: 위 Card들 중 DB에 새로 insert된 것들만의 (원본 Card -> 생성된 id) 매핑.
+     * 이미 DB에 있어서 새로 추가하지 않은 카드는 이 map에 없을 수 있으며, 그 경우
+     * 해당 카드의 혜택은 만들지 않는다 (이미 있는 혜택을 건드리지 않기 위함).
      */
-    fun benefits(cardIds: Map<Card, Long>): List<Benefit> {
-        val idPlatinumId = requireNotNull(cardIds[idPlatinum])
-        val asianaId = requireNotNull(cardIds[asianaGnMe])
-        val mrLifeId = requireNotNull(cardIds[mrLife])
+    fun benefits(cardIds: Map<Card, Long>): List<Benefit> = buildList {
+        cardIds[idPlatinum]?.let { addAll(idPlatinumBenefits(it)) }
+        cardIds[asianaGnMe]?.let { addAll(asianaGnMeBenefits(it)) }
+        cardIds[mrLife]?.let { addAll(mrLifeBenefits(it)) }
+        cardIds[travelZero]?.let { addAll(travelZeroBenefits(it)) }
+        cardIds[hanaTravelog]?.let { addAll(hanaTravelogBenefits(it)) }
+    }
 
-        return listOf(
-            // ---------- THE iD. PLATINUM(포인트) ----------
+    // ---------- THE iD. PLATINUM(포인트) ----------
+    private fun idPlatinumBenefits(idPlatinumId: Long): List<Benefit> =
+        listOf(
             Benefit(
                 cardId = idPlatinumId,
                 category = "적립",
@@ -114,9 +141,12 @@ object SeedData {
                 minSpend = 6_000_000,
                 conditionDetail = "첫해는 50만원 이상 이용 시 제공, 2차년도부터는 전년도 이용금액 600만원 이상 시 제공",
                 monthlyLimit = "연 1회"
-            ),
+            )
+        )
 
-            // ---------- 아시아나 삼성 지앤미 플래티늄 ----------
+    // ---------- 아시아나 삼성 지앤미 플래티늄 ----------
+    private fun asianaGnMeBenefits(asianaId: Long): List<Benefit> =
+        listOf(
             Benefit(
                 cardId = asianaId,
                 category = "마일리지",
@@ -170,9 +200,12 @@ object SeedData {
                 minSpend = null,
                 conditionDetail = "정확한 전월실적 조건은 카드사 홈페이지 확인 필요",
                 monthlyLimit = null
-            ),
+            )
+        )
 
-            // ---------- 신한카드 Mr.Life ----------
+    // ---------- 신한카드 Mr.Life ----------
+    private fun mrLifeBenefits(mrLifeId: Long): List<Benefit> =
+        listOf(
             Benefit(
                 cardId = mrLifeId,
                 category = "할인",
@@ -228,5 +261,86 @@ object SeedData {
                 monthlyLimit = "월 4회까지"
             )
         )
-    }
+
+    // ---------- 도깨비 트래블제로카드 ----------
+    private fun travelZeroBenefits(travelZeroId: Long): List<Benefit> =
+        listOf(
+            Benefit(
+                cardId = travelZeroId,
+                category = "해외",
+                title = "해외 가맹점 결제 수수료 면제",
+                rateOrAmount = "수수료 0원",
+                minSpend = null,
+                conditionDetail = "전월실적 조건 없음 (선불 충전식 카드)",
+                monthlyLimit = null
+            ),
+            Benefit(
+                cardId = travelZeroId,
+                category = "해외",
+                title = "환전 수수료 면제",
+                rateOrAmount = "환율우대 100%, 환전 수수료 0원",
+                minSpend = null,
+                conditionDetail = "원화 충전 후 결제 시점에 USD 기준으로 실시간 자동 환전",
+                monthlyLimit = null
+            ),
+            Benefit(
+                cardId = travelZeroId,
+                category = "해외",
+                title = "해외 ATM 출금 수수료 면제",
+                rateOrAmount = "건당 $3 수수료 면제",
+                minSpend = null,
+                conditionDetail = "전월실적 조건 없음",
+                monthlyLimit = null
+            ),
+            Benefit(
+                cardId = travelZeroId,
+                category = "적립",
+                title = "국내 가맹점 캐시백",
+                rateOrAmount = "0.2~0.3% 캐시백",
+                minSpend = null,
+                conditionDetail = "전월실적 조건 없음, 적립 한도 없음",
+                monthlyLimit = null
+            ),
+            Benefit(
+                cardId = travelZeroId,
+                category = "할인",
+                title = "제휴 매장 할인 (커피빈 외)",
+                rateOrAmount = "커피빈 15%, 부어치킨·코지하우스·또봉이통닭 7% 할인",
+                minSpend = null,
+                conditionDetail = "정확한 적용 조건은 카드사 홈페이지 확인 필요",
+                monthlyLimit = null
+            )
+        )
+
+    // ---------- 하나카드 트래블로그 체크카드(유니온페이) ----------
+    private fun hanaTravelogBenefits(hanaTravelogId: Long): List<Benefit> =
+        listOf(
+            Benefit(
+                cardId = hanaTravelogId,
+                category = "해외",
+                title = "해외 가맹점 결제 수수료 면제",
+                rateOrAmount = "해외서비스수수료 면제(건당 $0.5), 국제브랜드수수료 면제(1%)",
+                minSpend = null,
+                conditionDetail = "전월실적 조건 없음 (지난달 실적과 무관하게 매월 동일 제공)",
+                monthlyLimit = null
+            ),
+            Benefit(
+                cardId = hanaTravelogId,
+                category = "해외",
+                title = "해외 ATM 출금 수수료 면제",
+                rateOrAmount = "해외인출수수료 면제(건당 $3), 국제브랜드수수료 면제(1%)",
+                minSpend = null,
+                conditionDetail = "전월실적 조건 없음",
+                monthlyLimit = null
+            ),
+            Benefit(
+                cardId = hanaTravelogId,
+                category = "적립",
+                title = "국내 가맹점 하나머니 적립",
+                rateOrAmount = "0.3% 적립",
+                minSpend = null,
+                conditionDetail = "전월실적 조건 없음, 적립 한도 없음",
+                monthlyLimit = null
+            )
+        )
 }
