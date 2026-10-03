@@ -3,13 +3,24 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- 카드 몸체 -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M24,38 h60 a6,6 0 0 1 6,6 v20 a6,6 0 0 1 -6,6 h-60 a6,6 0 0 1 -6,-6 v-20 a6,6 0 0 1 6,-6 z" />
+        android:pathData="M28,33 h52 a6,6 0 0 1 6,6 v30 a6,6 0 0 1 -6,6 h-52 a6,6 0 0 1 -6,-6 v-30 a6,6 0 0 1 6,-6 z" />
+    <!-- 마그네틱 띠 -->
     <path
-        android:fillColor="#1B5E20"
-        android:pathData="M18,46 h72 v10 h-72 z" />
+        android:fillColor="#37474F"
+        android:pathData="M22,42 h64 v9 h-64 z" />
+    <!-- IC 칩 -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M30,64 h20 v6 h-20 z" />
+        android:fillColor="#FFC107"
+        android:pathData="M28,55 h14 a2,2 0 0 1 2,2 v8 a2,2 0 0 1 -2,2 h-14 a2,2 0 0 1 -2,-2 v-8 a2,2 0 0 1 2,-2 z" />
+    <!-- 카드번호 줄 -->
+    <path
+        android:fillColor="#90A4AE"
+        android:pathData="M28,66 h32 v3 h-32 z" />
+    <!-- 이름 줄 -->
+    <path
+        android:fillColor="#90A4AE"
+        android:pathData="M28,71 h20 v3 h-20 z" />
 </vector>
